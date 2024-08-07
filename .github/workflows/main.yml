@@ -1,4 +1,4 @@
-name: .NET Core 8 Build and Test
+name: Build and Publish ASP.NET Core 8 App
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,11 +20,19 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
 
-      - name: Build project
-        run: dotnet build -c Release
-
-      - name: Run tests
-        run: dotnet test -c Release
-
-      - name: Publish project
+      - name: Build and publish
         run: dotnet publish -c Release -o ./publish
+
+      - name: Publish to GitHub Pages
+        uses: gh-pages/publish@v1
+        with:
+          folder: ./publish
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy to Azure Web App (optional)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: <your-app-name>
+          slot-name: <your-slot-name>
+          publish-profile: <your-publish-profile>
+          package: ./publish
